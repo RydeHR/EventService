@@ -16,17 +16,6 @@ app.use(morgan('combined'));
 app.use(bodyParser());
 app.use(router.routes());
 
-/* ----------- GET & POST ROUTES ----------- */
-router.post('/events/history', async (ctx, next) => {
-	console.log('This is what we are getting from Mark', Object.values(ctx.request.body).join(','));
-	roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
-	.then(() => {
-
-	})
-	.catch((err) => {
-		console.log('There was an error with the insertion', err)
-	})
-})
 
 /* ----------- ROUND 0 - PASSING HISTORICAL DATA TO PRICING SERVICE ----------- */
 
@@ -36,28 +25,48 @@ router.post('/events/history', async (ctx, next) => {
 	// 10 Million entries loaded via COPY in Cassandra shell (cqlsh).
 
 	/* ----------- STEP 2 PASS DATA TO PRICING SERVICE ----------- */
-	const testing = () => { 
-		for(let i = 0; i < 20; i++) {
-			roundZero.sendToPricingService()
-		}
+	const postToPricingService = () => {
+		roundZero.sendToPricingService();
 	}
-	testing();
+
 /* ----------- ROUND 1 - USER OPENS THE APP AND GETS SURGE RATE ----------- */
 
 	/* ----------- USER DISAGREES WITH SURGE RATE ----------- */
-	// roundOne.logCloseEvent();
+	router.post('/events/history', async (ctx, next) => {
+		console.log('This is what we are getting from Mark', Object.values(ctx.request.body).join(','));
+		roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
+		.then(() => {
+			console.log('Successful insertion!');
+			postToLocationService();
+			postToPricingService();
+		})
+		.catch((err) => {
+			console.log('There was an error with the insertion', err)
+		})
+	})
 
 /* ----------- ROUND 2 - USER ENTERS DROPOFF LOCATION AND GETS PRICE ----------- */
 
 	/* ----------- USER DISAGREES WITH SURGE RATE ----------- */
-	// roundTwo.logCloseEvent();
+	// ALREADY INVOKED ABOVE
 
 /* ----------- ROUND 3 - USER AGREES TO PRICE AND BOOKS THE RIDE/EVENT ----------- */
 
 	/* ----------- USER DISAGREES WITH SURGE RATE ----------- */
-	// roundThree.logCloseEvent();
+	// ALREADY INVOKED ABOVE
 
 	/* ----------- USER BOOKS RIDE ----------- */
-	// roundThree.
+	const postToLocationService = () => {
+		roundThree.postToLocationService();
+	}
+
+/* ----------- 200ms TESTING ----------- */
+// // Uncomment To Test 200ms
+// const testing = () => { 
+// 		for(let i = 0; i < 20; i++) {
+// 			roundZero.sendToPricingService()
+// 		}
+// 	}
+// testing();
 
 app.listen(3000, () => console.log('Server started on Port 3000'));

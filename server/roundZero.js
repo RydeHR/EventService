@@ -22,10 +22,10 @@ roundZeroRouter = {
 	},
 
 	sendToPricingService: () => {
-		let start = new Date(); // THIS IS FOR TESTING THE 200 MS TIME THING
+		// let start = new Date(); // THIS IS FOR TESTING THE 200 MS TIME THING
 		roundZeroRouter.retrievePricingData()
 		.then((result) => {
-			console.log('This is the time it takes', new Date() - start, 'milliseconds');
+			// console.log('This is the time it takes', new Date() - start, 'milliseconds');
 			axios.post('/history', result.rows)
 			.then(() => { console.log('Successful post!')} )
 			.catch((err) => { console.log('Axios post is an error because we have not connected the services yet.') })
