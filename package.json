@@ -1,0 +1,31 @@
+{
+  "name": "Ryde-Dillon",
+  "version": "1.0.0",
+  "description": "Event Service",
+  "main": ".eslintrc.js",
+  "scripts": {
+    "start": "nodemon server/server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DillonLin/hrsf86-thesis.git"
+  },
+  "author": "Dillon Lin",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DillonLin/hrsf86-thesis/issues"
+  },
+  "homepage": "https://github.com/DillonLin/hrsf86-thesis#readme",
+  "dependencies": {
+    "axios": "^0.17.1",
+    "bluebird": "^3.5.1",
+    "cassandra-driver": "^3.3.0",
+    "csv-stringify": "^2.0.1",
+    "faker": "^4.1.0",
+    "koa": "^2.4.1",
+    "koa-bodyparser": "^4.2.0",
+    "koa-morgan": "^1.0.1",
+    "koa-router": "^7.3.0"
+  }
+}
