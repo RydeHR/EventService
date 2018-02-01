@@ -1,7 +1,7 @@
 {
-  "name": "Ryde-Dillon",
+  "name": "RydeHREventService",
   "version": "1.0.0",
-  "description": "Event Service",
+  "description": "Event Microservice",
   "main": ".eslintrc.js",
   "scripts": {
     "start": "nodemon server/server.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/DillonLin/hrsf86-thesis.git"
+    "url": "https://github.com/RydeHR/RydeHREventService.git"
   },
   "author": "Dillon Lin",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/DillonLin/hrsf86-thesis/issues"
+    "url": "https://github.com/RydeHR/RydeHREventService.git"
   },
-  "homepage": "https://github.com/DillonLin/hrsf86-thesis#readme",
+  "homepage": "https://github.com/RydeHR/RydeHREventService#readme",
   "dependencies": {
     "axios": "^0.17.1",
     "bluebird": "^3.5.1",

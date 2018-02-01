@@ -1,6 +1,6 @@
 # Project Name
 
-The project description
+MEOW MEOW MEOW
 
 ## Roadmap
 
