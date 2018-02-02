@@ -13,7 +13,9 @@ CREATE TABLE events (
 	event_End timestamp,
 	event_IsClosed boolean, 
 	rider_ID int,
+	rider_Firstname text,
 	driver_ID int,
+	driver_Firstname text,
 	driver_Availability boolean, 
 	timestamp_Pickup timestamp,
 	timestamp_Dropoff timestamp,
@@ -28,13 +30,19 @@ CREATE TABLE events (
 CREATE TABLE pricing (
 	event_ID int Primary Key,
 	timestamp_Pickup timestamp,
-	geolocation_SurgeZone list <int>,
+	geolocation_SurgeZone int,
 	surge_Multiplier decimal,
 	success boolean
 );
 
 CREATE TABLE location (
 	driver_ID int Primary Key,
-	geolocation_Dropoff list <int>,
-	geolocation_SurgeZone list <int>
+	geolocation_Dropoff list <decimal>,
+	geolocation_SurgeZone int
+);
+
+CREATE TABLE businessQuestion (
+	event_ID int Primary Key,
+	event_Start timestamp,
+	surge_Multiplier decimal,
 );

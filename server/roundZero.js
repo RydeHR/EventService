@@ -21,19 +21,23 @@ roundZeroRouter = {
 		})
 	},
 
-	sendToPricingService: () => {
-		// let start = new Date(); // THIS IS FOR TESTING THE 200 MS TIME THING
-		roundZeroRouter.retrievePricingData()
-		.then((result) => {
-			// console.log('This is the time it takes', new Date() - start, 'milliseconds');
-			axios.post('/history', result.rows)
-			.then(() => { console.log('Successful post!')} )
-			.catch((err) => { console.log('Axios post is an error because we have not connected the services yet.') })
+	storePricingData: (pricingData) => {
+		let query = `INSERT INTO pricing (event_ID, timestamp_Pickup, geolocation_SurgeZone, surge_Multiplier, success) VALUES (${pricingData})`;
+		return new Promise((resolve, reject) => {
+			client.execute(query, (err, result) => {
+				if(err) { reject(err); }
+				else { resolve(result); }
+			})
 		})
-		.catch((err) => {
-			console.log('There is an error in the retrievePricingData', err);
-		})
+	},
+
+	sendToPricingService: (pricingData) => {
+		axios.post('/history', pricingData)
+		.then(() => { roundZeroRouter.storePricingData(pricingData); })
+		.catch((err) => { console.log('Axios post is an error because we have not connected the services yet.') })
 	}
 };
+
+roundZeroRouter.retrievePricingData();
 
 module.exports = roundZeroRouter;

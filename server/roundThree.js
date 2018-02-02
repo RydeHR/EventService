@@ -12,27 +12,19 @@ client.connect();
 /* ----------- FUNCTIONS ----------- */
 roundThreeRouter = {
 
-	retrieveLocationData: () => {
-		let query = 'SELECT * FROM location WHERE event_ID=9999999';
+	sendToLocationService: (locationData) => {
+		axios.post('/driver', locationData)
+		.then(() => { roundThreeRouter.storeLocationData(locationData); })
+		.catch((err) => { console.log('Axios post is an error because we have not connected the services yet.') })
+	},
+
+	storeLocationData: (locationData) => {
+		let query = `INSERT INTO location (driver_ID, geolocation_Dropoff, geolocation_SurgeZone) VALUES (${locationData})`;
 		return new Promise ((resolve, reject) => { 
 			client.execute(query, (err, result) => {
 				if(err) { reject(err); }
 				else { resolve(result); }
 			})
-		})
-	},
-
-	sendToLocationService: () => {
-		// let start = new Date(); // THIS IS FOR TESTING THE 200 MS TIME THING
-		roundThreeRouter.retrievePricingData()
-		.then((result) => {
-			// console.log('This is the time it takes', new Date() - start, 'milliseconds');
-			axios.post('/driver', result.rows)
-			.then(() => { console.log('Successful post!')} )
-			.catch((err) => { console.log('Axios post is an error because we have not connected the services yet.') })
-		})
-		.catch((err) => {
-			console.log('There is an error in the retrieveLocationData', err);
 		})
 	}
 };

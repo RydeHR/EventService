@@ -1,4 +1,6 @@
 /* ----------- IMPORT PACKAGES ----------- */
+// const newrelic = require('newrelic'); // Uncomment for newRelic load testing
+// const koaNewrelic = require('koa-newrelic')(newrelic); // Uncomment for newRelic load testing
 const Koa = require('koa');
 const Router = require('koa-router');
 var bodyParser = require('koa-bodyparser');
@@ -9,13 +11,9 @@ const router = new Router();
 /* ----------- IMPORT SERVER ROUTES ----------- */
 const roundZero = require('./roundZero.js');
 const roundOne = require('./roundOne.js');
-const roundTwo = require('./roundTwo.js');
+const breakUpClientData = require('./breakUpClientData.js');
 const roundThree = require('./roundThree.js');
-
-app.use(morgan('combined'));
-app.use(bodyParser());
-app.use(router.routes());
-
+const roundFour = require('./roundFour.js');
 
 /* ----------- ROUND 0 - PASSING HISTORICAL DATA TO PRICING SERVICE ----------- */
 
@@ -24,21 +22,20 @@ app.use(router.routes());
 	// 10 Million entries saved in /TenMillionEntries.
 	// 10 Million entries loaded via COPY in Cassandra shell (cqlsh).
 
-	/* ----------- STEP 2 PASS DATA TO PRICING SERVICE ----------- */
-	const postToPricingService = () => {
-		roundZero.sendToPricingService();
-	}
+	/* ----------- STEP 2 CONTINUALLY PASS DATA TO PRICING SERVICE ----------- */
 
 /* ----------- ROUND 1 - USER OPENS THE APP AND GETS SURGE RATE ----------- */
 
 	/* ----------- USER DISAGREES WITH SURGE RATE ----------- */
 	router.post('/events/history', async (ctx, next) => {
-		console.log('This is what we are getting from Mark', Object.values(ctx.request.body).join(','));
 		roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
-		.then(() => {
-			console.log('Successful insertion!');
-			postToLocationService();
-			postToPricingService();
+		breakUpClientData.createSmallerObjects(ctx.request.body)
+		.then((result) => {
+			roundThree.sendToLocationService(result[1]);
+			roundThree.storeLocationData(Object.values(result[1]).join(','));
+			roundZero.sendToPricingService(result[0]);
+			roundZero.storePricingData(Object.values(result[0]).join(','));
+			roundFour.insertAnalyticsData(Object.values(result[2]).join(','));
 		})
 		.catch((err) => {
 			console.log('There was an error with the insertion', err)
@@ -46,9 +43,7 @@ app.use(router.routes());
 	})
 
 /* ----------- ROUND 2 - USER ENTERS DROPOFF LOCATION AND GETS PRICE ----------- */
-
-	/* ----------- USER DISAGREES WITH SURGE RATE ----------- */
-	// ALREADY INVOKED ABOVE
+// WE DON'T NEED TO ROUTE THIS BECAUSE THE FUNCTIONS ARE ALREADY COVERED BY STEPS 1 & STEP 3.
 
 /* ----------- ROUND 3 - USER AGREES TO PRICE AND BOOKS THE RIDE/EVENT ----------- */
 
@@ -56,11 +51,23 @@ app.use(router.routes());
 	// ALREADY INVOKED ABOVE
 
 	/* ----------- USER BOOKS RIDE ----------- */
-	const postToLocationService = () => {
-		roundThree.postToLocationService();
-	}
 
-/* ----------- 200ms TESTING ----------- */
+/* ----------- ROUND 4 - RETRIEVING DATA TO ANSWER THE BUSINESS QUESTION ----------- */
+
+	/* ----------- STORING DATA FOR ANALYTICS ----------- */
+
+	/* ----------- RETRIEVING DATA FOR ANALYTICS ----------- */
+	router.get('/analytics', async (ctx, next) => {
+		const displayData = await roundFour.retrieveAnalyticsData()
+		ctx.body = displayData.rows;
+	})
+
+/* ----------- APP.USE ----------- */
+app.use(morgan('combined'));
+app.use(bodyParser());
+app.use(router.routes());
+
+/* ----------- 200ms MANUAL TESTING ----------- */
 // // Uncomment To Test 200ms
 // const testing = () => { 
 // 		for(let i = 0; i < 20; i++) {
@@ -69,4 +76,11 @@ app.use(router.routes());
 // 	}
 // testing();
 
+/* ----------- ARTILLERY.IO LOAD TESTING ----------- */
+// (run in terminal) artillery run server/load_testing/loadTest.yml
+
+/* ----------- NEW RELIC LOAD TESTING ----------- */
+// app.use(koaNewrelic);
+
+/* ----------- APP.LISTEN ----------- */
 app.listen(3000, () => console.log('Server started on Port 3000'));
