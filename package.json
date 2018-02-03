@@ -19,6 +19,7 @@
   "homepage": "https://github.com/RydeHR/RydeHREventService#readme",
   "dependencies": {
     "artillery": "^1.6.0-12",
+    "aws-sdk": "^2.188.0",
     "axios": "^0.17.1",
     "bluebird": "^3.5.1",
     "cassandra-driver": "^3.3.0",

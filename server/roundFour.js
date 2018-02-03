@@ -23,8 +23,8 @@ roundFourRouter = {
 		})
 	},
 
-	retrieveAnalyticsData: () => {
-		let query = 'SELECT * FROM businessQuestion WHERE surge_Multiplier > 5';
+	retrieveAnalyticsData: (randomNumber) => {
+		let query = `SELECT * FROM businessQuestion WHERE surge_Multiplier > ${randomNumber}`;
 		return new Promise ((resolve, reject) => { 
 			client.execute(query, (err, result) => {
 				if(err) { reject(err); }
