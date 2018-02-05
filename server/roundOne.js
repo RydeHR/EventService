@@ -11,8 +11,8 @@ client.connect();
 
 /* ----------- FUNCTIONS ----------- */
 roundOneRouter = {
-	logCloseEvent: (event) => {
-		let query = `INSERT INTO events (event_ID, event_Start, event_End, event_IsClosed, rider_ID, driver_ID, driver_Availability, timestamp_Pickup, timestamp_Dropoff, geolocation_Pickup, geolocation_Dropoff, geolocation_SurgeZone, surge_Multiplier, price, success) VALUES (${event})`;
+	logCloseEvent: (eventData) => {
+		let query = `INSERT INTO events (event_ID, event_Start, event_End, event_IsClosed, rider_ID, rider_Firstname, driver_ID, driver_Firstname, driver_Availability, timestamp_Pickup, timestamp_Dropoff, geolocation_Pickup, geolocation_Dropoff, geolocation_SurgeZone, surge_Multiplier, price, success) VALUES (${eventData})`;
 		return new Promise((resolve, reject) => {
 			client.execute(query, (err, result) => {
 				if(err) { reject(err); }

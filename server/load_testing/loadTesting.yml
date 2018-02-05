@@ -1,0 +1,46 @@
+# # For Client Service Testing Later
+# config:
+#   target: 'http://127.0.0.1:3000'
+#   phases:
+#     - duration: 60
+#       arrivalRate: 20
+#   defaults:
+#     headers:
+#       x-my-service-auth: '987401838271002188298567'
+#   payload:
+#         # path is relative to the location of the test script
+#         path: "clientData.csv"
+#         fields:
+#           - "username"
+#           - "password"
+#     scenarios:
+#       - flow:
+#           - post:
+#               url: "/history/events"
+#               json:
+#                 username: "{{ username }}"
+#                 password: "{{ password }}"
+
+# For Posting Analytics
+# config:
+#   target: 'http://127.0.0.1:3000'
+#   phases:
+#     - duration: 60
+#       arrivalRate: 20
+#     scenarios:
+#       - flow:
+#           - post:
+#               url: "/events/history"
+
+# For Getting Analytics
+config:
+  target: 'http://127.0.0.1:3000'
+  phases:
+    - duration: 60
+      arrivalRate: 20
+scenarios:
+  - flow:
+    - loop:
+        - get:
+            url: "/analytics"
+      count: 100
