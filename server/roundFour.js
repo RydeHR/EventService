@@ -14,7 +14,6 @@ roundFourRouter = {
 
 	insertAnalyticsData: (businessQuestionData) => {
 		let query = `INSERT INTO businessQuestion (event_ID, event_Start, surge_Multiplier) VALUES (${businessQuestionData})`;
-		console.log('query for business', query);
 		return new Promise ((resolve, reject) => { 
 			client.execute(query, (err, result) => {
 				if(err) { reject(err); }
@@ -24,7 +23,7 @@ roundFourRouter = {
 	},
 
 	retrieveAnalyticsData: (randomNumber) => {
-		let query = `SELECT * FROM businessQuestion WHERE surge_Multiplier > ${randomNumber}`;
+		let query = `SELECT * FROM businessQuestion WHERE event_ID = ${randomNumber} allow filtering`;
 		return new Promise ((resolve, reject) => { 
 			client.execute(query, (err, result) => {
 				if(err) { reject(err); }

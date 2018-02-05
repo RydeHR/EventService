@@ -21,13 +21,26 @@
 #                 username: "{{ username }}"
 #                 password: "{{ password }}"
 
-# For Getting Analytics Testing
+# For Posting Analytics
+# config:
+#   target: 'http://127.0.0.1:3000'
+#   phases:
+#     - duration: 60
+#       arrivalRate: 20
+#     scenarios:
+#       - flow:
+#           - post:
+#               url: "/events/history"
+
+# For Getting Analytics
 config:
   target: 'http://127.0.0.1:3000'
   phases:
     - duration: 60
       arrivalRate: 20
-    scenarios:
-      - flow:
-          - post:
-              url: "/analytics"
+scenarios:
+  - flow:
+    - loop:
+        - get:
+            url: "/analytics"
+      count: 100

@@ -1,14 +1,15 @@
 /* ----------- REQUIRE PACKAGES ----------- */
 const Router = require('koa-router');
 const sqs_SendMessageRouter = new Router();
-const AWS = require('aws-sdk');
 const path = require('path');
-const QUEUE_URL = "https://sqs.us-east-2.amazonaws.com/771728572408/ClientToEvents";
 const axios = require('axios');
+const AWS = require('aws-sdk');
+const QUEUE_URL = "https://sqs.us-east-2.amazonaws.com/771728572408/ClientToEvents";
+
 
 /* ----------- AWS CONFIGURATION ----------- */
 // Set the region 
-AWS.config.update({region: 'us-east-1'});
+AWS.config.update({region: 'us-east-2'});
 
 // Loading My AWS credentials and trying to instantiate the object
 AWS.config.loadFromPath(path.join(__dirname + '../../../config.json'));
@@ -19,22 +20,8 @@ var sqs = new AWS.SQS({apiVersion: '2012-11-05'});
 // Create Message Parameters
 var params = {
   DelaySeconds: 0,
-  MessageAttributes: {
-    "Title": {
-      DataType: "String",
-      StringValue: "The Whistler"
-    },
-    "Author": {
-    DataType: "String",
-    StringValue: "John Grisham"
-    },
-  "WeeksOn": {
-    DataType: "Number",
-    StringValue: "6"
-   }
- },
- MessageBody: "did you get boba today??",
- QueueUrl: `${QUEUE_URL}`
+  MessageBody: "did you get boba today??",
+  QueueUrl: `${QUEUE_URL}`
 };
 
 const sendSQSMessage = (params) => { 
@@ -49,13 +36,22 @@ const sendSQSMessage = (params) => {
   })   
 }
 
-const sendToLocation = (message) => { 
+const sendToLocation = (locationData) => { 
   axios.post("https://sqs.us-east-2.amazonaws.com/771728572408/ClientToEvents", {
-    messageBody: `${message}`
+    messageBody: `${locationData}`
   })
-  .then((result) => console.log('This is the result', result))
-  .catch((err) => console.log('Jackie didnt get it', err))
+  .then((result) => console.log('This Is The Location Data Result', result))
+  .catch((err) => console.log('Send To Location Data Fail', err))
+}
+
+const sendToPricing = (pricingData) => { 
+  axios.post("https://sqs.us-east-2.amazonaws.com/771728572408/ClientToEvents", {
+    messageBody: `${pricingData}`
+  })
+  .then((result) => console.log('This Is The Pricing Data Result', result))
+  .catch((err) => console.log('Send To Pricing Data Fail', err))
 }
 
 exports.sendSQSMessage = sendSQSMessage;
 exports.sendToLocation = sendToLocation;
+exports.sendToPricing = sendToPricing;

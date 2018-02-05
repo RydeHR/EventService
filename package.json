@@ -24,6 +24,7 @@
     "bluebird": "^3.5.1",
     "cassandra-driver": "^3.3.0",
     "csv-stringify": "^2.0.1",
+    "dotenv": "^5.0.0",
     "faker": "^4.1.0",
     "koa": "^2.4.1",
     "koa-bodyparser": "^4.2.0",

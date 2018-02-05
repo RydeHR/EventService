@@ -1,12 +1,13 @@
 /* ----------- REQUIRE PACKAGES ----------- */
-// const newrelic = require('newrelic'); // Uncomment for newRelic load testing
-// const koaNewrelic = require('koa-newrelic')(newrelic); // Uncomment for newRelic load testing
-const Koa = require('koa');
-const Router = require('koa-router');
+var newrelic = require('newrelic'); // Uncomment For newRelic load testing
+var koaNewrelic = require('koa-newrelic')(newrelic); // Uncomment For newRelic load testing
+var Koa = require('koa');
+var app = new Koa();
+var Router = require('koa-router');
+var router = new Router();
 var bodyParser = require('koa-bodyparser');
-const morgan = require('koa-morgan');
-const app = new Koa();
-const router = new Router();
+var morgan = require('koa-morgan');
+
 
 /* ----------- IMPORT SERVER ROUTES ----------- */
 // ROUND 0 - 4 ROUTES
@@ -16,9 +17,14 @@ const breakUpClientData = require('./breakUpClientData.js');
 const roundThree = require('./roundThree.js');
 const roundFour = require('./roundFour.js');
 
-// AMAZON SQS ROUTES
-const sqs_SendMessage = require('./amazon_SQS/sqs_SendMessage.js');
-sqs_SendMessage.sendToLocation('I WILL SURVIVE EFNSKFKNSDKDFNJ!!!!!');
+// sqs_ReceiveMessage.receiveSQSMessage()
+// .then((result) => {
+//   console.log('This is what we get back from SQS queue message', result)
+// })
+// .catch((error) => {
+//   console.log('There is an error with getting message from SQS queue', error)
+// })
+
 /* ----------- ROUND 0 - PASSING HISTORICAL DATA TO PRICING SERVICE ----------- */
 
 	// STEP 1 GENERATE & LOAD INITIAL 10 MILLION DATA
@@ -35,9 +41,9 @@ sqs_SendMessage.sendToLocation('I WILL SURVIVE EFNSKFKNSDKDFNJ!!!!!');
 		roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
 		breakUpClientData.createSmallerObjects(ctx.request.body)
 		.then((result) => {
-			roundThree.sendToLocationService(result[1]);
+			roundThree.sendToSQSLocationService(result[1]);
 			roundThree.storeLocationData(Object.values(result[1]).join(','));
-			roundZero.sendToPricingService(result[0]);
+			roundZero.sendToSQSPricingService(result[0]);
 			roundZero.storePricingData(Object.values(result[0]).join(','));
 			roundFour.insertAnalyticsData(Object.values(result[2]).join(','));
 		})
@@ -62,7 +68,7 @@ sqs_SendMessage.sendToLocation('I WILL SURVIVE EFNSKFKNSDKDFNJ!!!!!');
 
 	/* ----------- RETRIEVING DATA FOR ANALYTICS ----------- */
 	router.get('/analytics', async (ctx, next) => {
-		let randomNumber = Math.floor(Math.random()*10);
+		let randomNumber = Math.floor(Math.random()*1500);
 		const displayData = await roundFour.retrieveAnalyticsData(randomNumber)
 		console.log('Client is querying for this ->', displayData.rows);
 		ctx.body = displayData.rows;
@@ -73,20 +79,11 @@ app.use(morgan('combined'));
 app.use(bodyParser());
 app.use(router.routes());
 
-/* ----------- 200ms MANUAL TESTING ----------- */
-// // Uncomment To Test 200ms
-// const testing = () => { 
-// 		for(let i = 0; i < 20; i++) {
-// 			roundZero.sendToPricingService()
-// 		}
-// 	}
-// testing();
-
 /* ----------- ARTILLERY.IO LOAD TESTING ----------- */
 // (run in terminal) artillery run server/load_testing/loadTest.yml
 
 /* ----------- NEW RELIC LOAD TESTING ----------- */
-// app.use(koaNewrelic);
+app.use(koaNewrelic);
 
 /* ----------- APP.LISTEN ----------- */
 app.listen(3000, () => console.log('Server started on Port 3000'));
