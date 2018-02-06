@@ -17,13 +17,13 @@ const breakUpClientData = require('./breakUpClientData.js');
 const roundThree = require('./roundThree.js');
 const roundFour = require('./roundFour.js');
 
-// sqs_ReceiveMessage.receiveSQSMessage()
-// .then((result) => {
-//   console.log('This is what we get back from SQS queue message', result)
-// })
-// .catch((error) => {
-//   console.log('There is an error with getting message from SQS queue', error)
-// })
+roundOne.receiveSQSMessage()
+.then((result) => {
+  console.log('This is what we get back from SQS queue message', result)
+})
+.catch((error) => {
+  console.log('There is an error with getting message from SQS queue', error)
+})
 
 /* ----------- ROUND 0 - PASSING HISTORICAL DATA TO PRICING SERVICE ----------- */
 
@@ -41,10 +41,10 @@ const roundFour = require('./roundFour.js');
 		roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
 		breakUpClientData.createSmallerObjects(ctx.request.body)
 		.then((result) => {
-			roundThree.sendToSQSLocationService(result[1]);
-			roundThree.storeLocationData(Object.values(result[1]).join(','));
-			roundZero.sendToSQSPricingService(result[0]);
+			roundZero.publishPricingDataToSNS(result[0]);
 			roundZero.storePricingData(Object.values(result[0]).join(','));
+      roundThree.publishLocationsDataToSNS(result[1]);
+      roundThree.storeLocationData(Object.values(result[1]).join(','));
 			roundFour.insertAnalyticsData(Object.values(result[2]).join(','));
 		})
 		.catch((err) => {

@@ -38,6 +38,7 @@ var generateOneMillion = (start, end, name) => {
 	})
 }
 
+// // Uncomment To Generate CSV Files
 // generateOneMillion(0, 1000000, 'first')
 // generateOneMillion(1000000, 2000000, 'second')
 // generateOneMillion(2000000, 3000000, 'third')
