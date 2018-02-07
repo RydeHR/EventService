@@ -3,7 +3,6 @@ var Router = require('koa-router');
 var roundOneRouter = new Router();
 const cassandra = require('cassandra-driver');
 const path = require('path');
-const axios = require('axios');
 const Promise = require('bluebird');
 const AWS = require('aws-sdk');
 
@@ -35,19 +34,32 @@ roundOneRouter = {
 		})
 	},
 
+  getSQSAttributes: () => {
+    return new Promise ((resolve, reject) => {
+      sqs.getQueueAttributes({
+        QueueUrl: QUEUE_URL,
+        AttributeNames: ['ApproximateNumberOfMessages']
+      }, function (err, result) {
+          if (err) { reject(err); }
+          else { resolve(result.Attributes.ApproximateNumberOfMessages); }
+      });
+    })
+  },
+
   receiveSQSMessage: () => {
-  return new Promise((resolve, reject) => {
-    sqs.receiveMessage({
-      AttributeNames: ['SentTimestamp'],
-      MaxNumberOfMessages: 10,
-      QueueUrl: QUEUE_URL,
-      VisibilityTimeout: 0,
-      WaitTimeSeconds: 0
-    }, function(err, data) {
-      if (err) {
-        console.log('Error Retrieving Data', err);
-        reject(err);
-      } else if (data) {
+    return new Promise((resolve, reject) => {
+      sqs.receiveMessage({
+        AttributeNames: ['SentTimestamp'],
+        MaxNumberOfMessages: 1,
+        QueueUrl: QUEUE_URL,
+        VisibilityTimeout: 0,
+        WaitTimeSeconds: 0
+      }, function(err, data) {
+        if (err) {
+          console.log('Error Retrieving Data', err);
+          reject(err);
+        } 
+        else if (data) {
           if(data.Messages) {
             var deleteParams = {
               QueueUrl: QUEUE_URL,
@@ -62,7 +74,7 @@ roundOneRouter = {
         }
       });
     })
-  }
+  } 
 };
 
 module.exports = roundOneRouter;

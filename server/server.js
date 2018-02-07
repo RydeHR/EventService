@@ -10,20 +10,22 @@ var morgan = require('koa-morgan');
 
 
 /* ----------- IMPORT SERVER ROUTES ----------- */
-// ROUND 0 - 4 ROUTES
 const roundZero = require('./roundZero.js');
 const roundOne = require('./roundOne.js');
 const breakUpClientData = require('./breakUpClientData.js');
 const roundThree = require('./roundThree.js');
 const roundFour = require('./roundFour.js');
 
-roundOne.receiveSQSMessage()
-.then((result) => {
-  console.log('This is what we get back from SQS queue message', result)
-})
-.catch((error) => {
-  console.log('There is an error with getting message from SQS queue', error)
-})
+var pullFromSQS = async function() {
+  var messagesInQueue = await roundOne.getSQSAttributes()
+  while (messagesInQueue > 0) {
+    var currentMessage = await roundOne.receiveSQSMessage()
+    console.log('This is what we get back from SQS queue message', JSON.parse(currentMessage["Messages"][0]["Body"]).Message)
+    messagesInQueue--;
+  } 
+}
+
+pullFromSQS();
 
 /* ----------- ROUND 0 - PASSING HISTORICAL DATA TO PRICING SERVICE ----------- */
 
@@ -70,7 +72,6 @@ roundOne.receiveSQSMessage()
 	router.get('/analytics', async (ctx, next) => {
 		let randomNumber = Math.floor(Math.random()*1500);
 		const displayData = await roundFour.retrieveAnalyticsData(randomNumber)
-		console.log('Client is querying for this ->', displayData.rows);
 		ctx.body = displayData.rows;
 	})
 

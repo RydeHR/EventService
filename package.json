@@ -5,7 +5,7 @@
   "main": ".eslintrc.js",
   "scripts": {
     "start": "nodemon server/server.js",
-    "mocha": "mocha unit_testing/roundZeroTest.js"
+    "mocha": "mocha unit_testing/"
   },
   "repository": {
     "type": "git",
