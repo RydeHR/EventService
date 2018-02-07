@@ -3,7 +3,6 @@ var Router = require('koa-router');
 var roundZeroRouter = new Router();
 const cassandra = require('cassandra-driver');
 const path = require('path');
-const axios = require('axios');
 const Promise = require('bluebird');
 const AWS = require('aws-sdk');
 
@@ -44,42 +43,21 @@ roundZeroRouter = {
 	},
 
   publishPricingDataToSNS: (pricingData) => {
-    // console.log('Pricing data was sent!');
-    sns.publish({
-      Message: JSON.stringify({default: pricingData}),
-      MessageStructure: 'json',
-      TargetArn: 'arn:aws:sns:us-east-2:771728572408:Event_Service'
-    }, function(err, data) {
-      if (err) {
-        console.log('ERROR WITH THE SNS PUBLISH', err.stack);
-        return;
-      } else {
-        console.log('SUCCESSFUL PUBLISH TO SNS')
-      }
-    });
+    defaultMessage = JSON.stringify(pricingData)
+    return new Promise ((resolve, reject) => {
+      sns.publish({
+        Message: JSON.stringify({ default: defaultMessage }),
+        MessageStructure: 'json',
+        TargetArn: 'arn:aws:sns:us-east-2:771728572408:Event_Service'
+      }, function(err, data) {
+        if (err) {
+          reject(err)
+        } else {
+          resolve(data)
+        }
+      });
+    })
   }
-
-  // // SQS Version Of Send Pricing
-  // sendToSQSPricingService: (pricingData) => {
-  //   return new Promise((resolve, reject) => {
-  //     sqs.sendMessage({
-  //       DelaySeconds: 0,
-  //       MessageBody: `${pricingData}`,
-  //       QueueUrl: `${QUEUE_URL}`
-  //     }, function(err, data) {
-  //       if (err) { reject(err); }
-  //       else { resolve(data); }
-  //     })
-  //   })   
-  // }
-
-  // // Axios Version Of Send Pricing
-	// sendToPricingService: (pricingData) => {
-	// 	axios.post('/history', pricingData)
-	// 	.then(() => { roundZeroRouter.storePricingData(pricingData); })
-	// 	.catch((err) => { console.log('Axios post is an error because we have not connected the services yet.') })
-	// }
-
 };
 
 module.exports = roundZeroRouter;
