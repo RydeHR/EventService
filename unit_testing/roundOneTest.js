@@ -30,8 +30,8 @@ describe('Round One - Rider Disagrees With The Surge Multiplier', () => {
     receiveSQSMessage().then((result) => { assert.equal(typeof result, 'object'); }).catch((error) => console.log(error));
     done();
   })
-  xit('ReceiveSQSMessage Should Delete A Message From The SQS Queue', (done) => {
-    receiveSQSMessage().then((result) => { assert.equal(typeof result, 'object'); }).catch((error) => console.log(error));
+  it('ReceiveSQSMessage Should Delete A Message From The SQS Queue', (done) => {
+    receiveSQSMessage().then((result) => { assert.equal(result.Message, undefined); }).catch((error) => console.log(error));
     done();
   })
 })

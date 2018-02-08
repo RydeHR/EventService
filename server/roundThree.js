@@ -38,7 +38,7 @@ roundThreeRouter = {
       sns.publish({
         Message: JSON.stringify({ default: defaultMessage }),
         MessageStructure: 'json',
-        TargetArn: 'arn:aws:sns:us-east-2:771728572408:Event_Service'
+        TargetArn: 'arn:aws:sns:us-east-2:771728572408:Testing'
       }, function(err, data) {
         if (err) {
           reject(err)

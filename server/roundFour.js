@@ -1,4 +1,4 @@
-/* ----------- PACKAGES ----------- */
+/* ----------- REQUIRE PACKAGES ----------- */
 var Router = require('koa-router');
 var roundFourRouter = new Router();
 const cassandra = require('cassandra-driver');

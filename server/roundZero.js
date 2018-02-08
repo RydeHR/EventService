@@ -23,12 +23,12 @@ var sns = new AWS.SNS();
 roundZeroRouter = {
 
 	retrievePricingData: () => {
-		let query = 'SELECT * FROM events limit 5000';
+		let query = 'SELECT * FROM pricing limit 5000';
 		return new Promise ((resolve, reject) => { 
-			client.execute(query, (err, result) => {
-				if(err) { reject(err); }
-				else { resolve(result); }
-			})
+  			client.execute(query, (err, result) => {
+  				if(err) { reject(err); }
+  				else { resolve(result); }
+  			})
 		})
 	},
 
@@ -48,7 +48,7 @@ roundZeroRouter = {
       sns.publish({
         Message: JSON.stringify({ default: defaultMessage }),
         MessageStructure: 'json',
-        TargetArn: 'arn:aws:sns:us-east-2:771728572408:Event_Service'
+        TargetArn: 'arn:aws:sns:us-east-2:771728572408:Testing'
       }, function(err, data) {
         if (err) {
           reject(err)

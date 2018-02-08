@@ -7,7 +7,9 @@ var Router = require('koa-router');
 var router = new Router();
 var bodyParser = require('koa-bodyparser');
 var morgan = require('koa-morgan');
-
+const path = require('path');
+const AWS = require('aws-sdk');
+const Consumer = require('sqs-consumer');
 
 /* ----------- IMPORT SERVER ROUTES ----------- */
 const roundZero = require('./roundZero.js');
@@ -15,17 +17,18 @@ const roundOne = require('./roundOne.js');
 const breakUpClientData = require('./breakUpClientData.js');
 const roundThree = require('./roundThree.js');
 const roundFour = require('./roundFour.js');
+const exampleSNSPublish = require('./example_amazon_SNS/example_sns_PublishMessage.js');
 
-var pullFromSQS = async function() {
-  var messagesInQueue = await roundOne.getSQSAttributes()
-  while (messagesInQueue > 0) {
-    var currentMessage = await roundOne.receiveSQSMessage()
-    console.log('This is what we get back from SQS queue message', JSON.parse(currentMessage["Messages"][0]["Body"]).Message)
-    messagesInQueue--;
-  } 
-}
+/* ----------- AWS CONFIGURATION ----------- */
 
-pullFromSQS();
+// Loading AWS Credentials
+AWS.config.loadFromPath(path.join(__dirname + '../../config.json'));
+
+// Create SQS Service Object
+var sqs = new AWS.SQS({ apiVersion: '2012-11-05' });
+
+// AWS Queue URL
+const QUEUE_URL = 'https://sqs.us-east-2.amazonaws.com/771728572408/ClientToEvents';
 
 /* ----------- ROUND 0 - PASSING HISTORICAL DATA TO PRICING SERVICE ----------- */
 
@@ -38,21 +41,35 @@ pullFromSQS();
 
 /* ----------- ROUND 1 - USER OPENS THE APP AND GETS SURGE RATE ----------- */
 
-	// USER DISAGREES WITH SURGE RATE
-	router.post('/events/history', async (ctx, next) => {
-		roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
-		breakUpClientData.createSmallerObjects(ctx.request.body)
-		.then((result) => {
-			roundZero.publishPricingDataToSNS(result[0]);
-			roundZero.storePricingData(Object.values(result[0]).join(','));
-      roundThree.publishLocationsDataToSNS(result[1]);
-      roundThree.storeLocationData(Object.values(result[1]).join(','));
-			roundFour.insertAnalyticsData(Object.values(result[2]).join(','));
-		})
-		.catch((err) => {
-			console.log('There was an error with the insertion', err)
-		})
-	})
+  // // UNCOMMENT TO TEST A SINGLE CASE OF SNS PUBLISH
+  // exampleSNSPublish.publishMessage();
+
+  // USER DISAGREES WITH THE SURGE RATE
+  const continuousPolling = Consumer.create({
+    queueUrl: QUEUE_URL,
+    region: 'us-east-2',
+    handleMessage: (message, done) => {
+      roundOne.logCloseEvent(Object.values(JSON.parse(JSON.parse(message.Body).Message)).join(','))
+      breakUpClientData.createSmallerObjects(JSON.parse(JSON.parse(message.Body).Message))
+      .then((result) => {
+        roundZero.publishPricingDataToSNS(result[0]);
+        roundZero.storePricingData(Object.values(result[0]).join(','));
+        roundThree.publishLocationsDataToSNS(result[1]);
+        roundThree.storeLocationData(Object.values(result[1]).join(','));
+        roundFour.insertAnalyticsData(Object.values(result[2]).join(','));
+      })
+      .catch((err) => {
+        console.log('There was an error with the insertion', err)
+      })
+      done();
+    }
+  });
+
+  continuousPolling.on('error', err => {
+    console.error('Continuous Polling Error', err);
+  });
+
+  continuousPolling.start();
 
 /* ----------- ROUND 2 - USER ENTERS DROPOFF LOCATION AND GETS PRICE ----------- */
 	// WE DON'T NEED TO ROUTE THIS BECAUSE THE FUNCTIONS ARE ALREADY COVERED BY STEPS 1 & STEP 3.
@@ -75,15 +92,26 @@ pullFromSQS();
 		ctx.body = displayData.rows;
 	})
 
+/* ----------- ARTILLERY LOAD TESTING ----------- */
+// router.post('/events/history', async (ctx, next) => {
+//     roundOne.logCloseEvent(Object.values(ctx.request.body).join(','))
+//     breakUpClientData.createSmallerObjects(ctx.request.body)
+//     .then((result) => {
+//       roundZero.publishPricingDataToSNS(result[0]);
+//       roundZero.storePricingData(Object.values(result[0]).join(','));
+//       roundThree.publishLocationsDataToSNS(result[1]);
+//       roundThree.storeLocationData(Object.values(result[1]).join(','));
+//       roundFour.insertAnalyticsData(Object.values(result[2]).join(','));
+//     })
+//     .catch((err) => {
+//       console.log('There was an error with the insertion', err)
+//     })
+//   })
+
 /* ----------- APP.USE ----------- */
 app.use(morgan('combined'));
 app.use(bodyParser());
 app.use(router.routes());
-
-/* ----------- ARTILLERY.IO LOAD TESTING ----------- */
-// (run in terminal) artillery run server/load_testing/loadTest.yml
-
-/* ----------- NEW RELIC LOAD TESTING ----------- */
 app.use(koaNewrelic);
 
 /* ----------- APP.LISTEN ----------- */
