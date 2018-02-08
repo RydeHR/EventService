@@ -5,7 +5,8 @@
   "main": ".eslintrc.js",
   "scripts": {
     "start": "nodemon server/server.js",
-    "mocha": "mocha unit_testing/"
+    "mocha": "nyc mocha unit_testing/ --timeout=3000",
+    "loadTest": "artillery run server/load_testing/loadTest.yml"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "dependencies": {
     "artillery": "^1.6.0-12",
     "aws-sdk": "^2.188.0",
+    "aws-sqs-consumer": "^2.0.1",
     "axios": "^0.17.1",
     "bluebird": "^3.5.1",
     "cassandra-driver": "^3.3.0",
@@ -33,10 +35,10 @@
     "koa-newrelic": "^2.0.3",
     "koa-router": "^7.3.0",
     "mocha": "^5.0.0",
-    "newrelic": "^2.7.0"
+    "newrelic": "^2.7.0",
+    "sqs-consumer": "^3.8.0"
   },
   "devDependencies": {
-    "chai": "^4.1.2",
-    "mocha": "^5.0.0"
+    "nyc": "^11.4.1"
   }
 }

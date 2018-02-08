@@ -1,4 +1,4 @@
-/* ----------- PACKAGES ----------- */
+/* ----------- REQUIRE PACKAGES ----------- */
 var Router = require('koa-router');
 var roundOneRouter = new Router();
 const cassandra = require('cassandra-driver');
@@ -45,7 +45,8 @@ roundOneRouter = {
       });
     })
   },
-
+  
+  // THIS FUNCTION IS ONLY USED FOR TESTING PURPOSES
   receiveSQSMessage: () => {
     return new Promise((resolve, reject) => {
       sqs.receiveMessage({
@@ -74,7 +75,7 @@ roundOneRouter = {
         }
       });
     })
-  } 
+  }
 };
 
 module.exports = roundOneRouter;

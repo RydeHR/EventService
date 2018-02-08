@@ -16,8 +16,8 @@ const publishPricingDataToSNS = roundZero.publishPricingDataToSNS;
 
 /* ----------- UNIT TESTS ----------- */
 describe('Round Zero - Rider Opens The App', () => {
-  it('RetrievePricingData Should Continuously Retrieve 5000 Pricing Entries', (done) => {
-    retrievePricingData().then((result) => { assert.equal(result.rowLength, 5000); });
+  it('RetrievePricingData Should Continuously Retrieve Less Than Or 5000 Pricing Entries', (done) => {
+    retrievePricingData().then((result) => { assert.equal(result.rowLength <= 5000, true); });
     done();
   })
   it('RetrievePricingData Should Retrieve Pricing Entries In Under 200ms', (done) => {

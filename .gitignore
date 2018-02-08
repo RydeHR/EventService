@@ -4,8 +4,6 @@ config/production.json
 config/staging.json
 config/test.json
 config.json
-
-# Local Attributes
 package-lock.json
 
 # Environment Variables
@@ -44,3 +42,4 @@ node_modules/
 TenMillionEntries/
 TenMillionEntriesAnalytics/
 bower_components/
+.nyc_output/
